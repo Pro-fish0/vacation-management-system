@@ -44,9 +44,19 @@ function Reports() {
   };
 
   const filteredVacations = vacations.filter(vacation => {
-    const vacationDate = new Date(vacation.gregStartDate);
-    const yearMatch = vacationDate.getFullYear() === selectedYear;
-    const monthMatch = selectedMonth === 'all' || vacationDate.getMonth() === parseInt(selectedMonth);
+    const vacationStartDate = new Date(vacation.gregStartDate);
+    const vacationEndDate = new Date(vacation.gregEndDate);
+    const yearMatch = (vacationStartDate.getFullYear() === selectedYear || vacationEndDate.getFullYear() === selectedYear);
+    
+    const monthMatch = selectedMonth === 'all' || (
+      // Check if any day of the vacation falls within the selected month and year
+      (vacationStartDate.getFullYear() === selectedYear && vacationStartDate.getMonth() === parseInt(selectedMonth)) ||
+      (vacationEndDate.getFullYear() === selectedYear && vacationEndDate.getMonth() === parseInt(selectedMonth)) ||
+      // Check if vacation spans over the selected month
+      (vacationStartDate <= new Date(selectedYear, parseInt(selectedMonth), 1) && 
+       vacationEndDate >= new Date(selectedYear, parseInt(selectedMonth) + 1, 0))
+    );
+    
     const typeMatch = selectedType === 'all' || vacation.type === selectedType;
     return yearMatch && monthMatch && typeMatch;
   });
